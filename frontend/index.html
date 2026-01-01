@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockIQ - Intelligent Market Analysis</title>
+    <!-- Modern Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Plotly for Charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Overlay for Mobile Sidebar -->
+        <div id="drawer-overlay" class="drawer-overlay"></div>
+
+        <!-- Sidebar / Navigation Drawer -->
+        <aside id="app-sidebar" class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <i data-feather="trending-up" class="brand-brand"></i>
+                    <span class="brand-text">StockIQ</span>
+                </div>
+                <button id="close-drawer" class="icon-btn mobile-only" aria-label="Close menu">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Analysis Mode</span>
+                    <div class="nav-items">
+                        <button class="nav-item active" data-view="Home" id="nav-home">
+                            <i data-feather="grid"></i>
+                            <span>Market Overview</span>
+                        </button>
+                        <button class="nav-item" data-view="Machine Learning" id="nav-ml">
+                            <i data-feather="cpu"></i>
+                            <span>ML Forecasts</span>
+                        </button>
+                        <button class="nav-item" data-view="Technical Analysis" id="nav-ta">
+                            <i data-feather="activity"></i>
+                            <span>Technical Indicators</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="nav-section config-section">
+                    <span class="nav-section-title">Configuration</span>
+                    <div class="form-group">
+                        <label for="ticker">Ticker Symbol</label>
+                        <div class="input-with-icon">
+                            <i data-feather="search"></i>
+                            <input type="text" id="ticker" placeholder="e.g. GOOG, AAPL" value="GOOG">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <span class="form-section-title">Date Range</span>
+                        <div class="range-presets">
+                            <button type="button" class="preset-btn" data-range="1M">1M</button>
+                            <button type="button" class="preset-btn" data-range="3M">3M</button>
+                            <button type="button" class="preset-btn" data-range="6M">6M</button>
+                            <button type="button" class="preset-btn active" data-range="1Y">1Y</button>
+                            <button type="button" class="preset-btn" data-range="5Y">5Y</button>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Start Date</label>
+                                <div class="input-with-icon">
+                                    <i data-feather="calendar"></i>
+                                    <input type="date" id="startDate" value="2020-01-01">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="endDate">End Date</label>
+                                <div class="input-with-icon">
+                                    <i data-feather="calendar"></i>
+                                    <input type="date" id="endDate">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="home-specific-config" class="specific-config">
+                        <div class="form-group">
+                            <label for="interval">Data Interval</label>
+                            <select id="interval">
+                                <option value="1d" selected>Daily</option>
+                                <option value="1wk">Weekly</option>
+                                <option value="1mo">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="chartType">Chart Type</label>
+                            <select id="chartType">
+                                <option value="Line">Line Chart</option>
+                                <option value="Area">Area Chart</option>
+                                <option value="Candlestick" selected>Candlestick</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price Overlays</label>
+                            <div class="overlay-options">
+                                <label class="checkbox-group">
+                                    <input type="checkbox" id="sma20"> <span>SMA 20</span>
+                                </label>
+                                <label class="checkbox-group">
+                                    <input type="checkbox" id="sma50"> <span>SMA 50</span>
+                                </label>
+                                <label class="checkbox-group">
+                                    <input type="checkbox" id="sma200"> <span>SMA 200</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="showVolume" checked>
+                            <label for="showVolume">Show Volume Chart</label>
+                        </div>
+                    </div>
+
+                    <div id="ml-specific-config" class="specific-config hidden">
+                        <div class="form-group">
+                            <label for="mlModel">ML Model</label>
+                            <select id="mlModel">
+                                <option value="LSTM">Long Short-Term Memory (LSTM)</option>
+                                <option value="Tree Classifier">Decision Tree Classifier</option>
+                                <option value="Prophet">Facebook Prophet</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="ta-specific-config" class="specific-config hidden">
+                        <div class="form-group">
+                            <label for="taIndicator">Indicator</label>
+                            <select id="taIndicator">
+                                <option value="EMA">Exponential Moving Average (EMA)</option>
+                                <option value="RSI">Relative Strength Index (RSI)</option>
+                                <option value="MACD">MACD</option>
+                                <option value="Bollinger Band">Bollinger Bands</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="runBtn" class="btn btn-primary btn-run">
+                    <span class="btn-label">Run Analysis</span>
+                    <div class="loader hidden"></div>
+                </button>
+                <div id="error-msg" class="error-banner hidden">
+                    <i data-feather="alert-circle"></i>
+                    <span id="error-text"></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="app-main">
+            <!-- Top App Bar (Mobile) -->
+            <header class="mobile-app-bar">
+                <button id="open-drawer" class="icon-btn" aria-label="Open menu">
+                    <i data-feather="menu"></i>
+                </button>
+                <div class="brand">
+                    <i data-feather="trending-up"></i>
+                    <span class="brand-text">StockIQ</span>
+                </div>
+                <div class="placeholder"></div>
+            </header>
+
+            <main class="content-body" id="main-content">
+                <!-- Welcome / Empty State -->
+                <div id="empty-state" class="empty-state">
+                    <div class="illustration">
+                        <i data-feather="bar-chart-2"></i>
+                    </div>
+                    <h2>Welcome to StockIQ</h2>
+                    <p>Configure your parameters in the sidebar and click <strong>Run Analysis</strong> to begin.</p>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-area" class="results-area hidden">
+                    <!-- Home View -->
+                    <section id="view-Home" class="results-view hidden">
+                        <header class="view-header">
+                            <h1>Market Overview</h1>
+                            <p class="ticker-badge" id="display-ticker"></p>
+                        </header>
+
+                        <div class="results-grid">
+                            <div class="card full-width">
+                                <div class="card-header">
+                                    <h3>Price History</h3>
+                                </div>
+                                <div id="price-chart" class="chart-container"></div>
+                            </div>
+
+                            <div class="card full-width">
+                                <div class="card-header">
+                                    <h3>Company Fundamentals</h3>
+                                </div>
+                                <div id="fundamentals-container" class="fundamentals-grid">
+                                    <!-- Dynamic fundamentals go here -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Machine Learning View -->
+                    <section id="view-ML" class="results-view hidden">
+                        <header class="view-header">
+                            <h1>ML Forecasting</h1>
+                            <div class="header-content">
+                                <span class="ticker-badge" id="ml-display-ticker"></span>
+                                <span class="model-badge" id="ml-display-model"></span>
+                            </div>
+                        </header>
+
+                        <div class="card-grid">
+                            <div class="card info-card">
+                                <i data-feather="info"></i>
+                                <p id="ml-description"></p>
+                            </div>
+
+                            <div class="card full-width">
+                                <div class="card-header">
+                                    <h3>Model Prediction</h3>
+                                </div>
+                                <div id="ml-chart" class="chart-container"></div>
+                            </div>
+
+                            <div class="card metrics-card">
+                                <div class="card-header">
+                                    <h3>Performance Metrics</h3>
+                                </div>
+                                <div id="ml-metrics" class="metrics-grid">
+                                    <!-- Metrics go here -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Technical Analysis View -->
+                    <section id="view-TA" class="results-view hidden">
+                        <header class="view-header">
+                            <h1>Technical Analysis</h1>
+                            <div class="header-content">
+                                <span class="ticker-badge" id="ta-display-ticker"></span>
+                                <span class="indicator-badge" id="ta-display-indicator"></span>
+                            </div>
+                        </header>
+
+                        <div class="card-grid">
+                            <div class="card info-card">
+                                <i data-feather="info"></i>
+                                <p id="ta-description"></p>
+                            </div>
+
+                            <div class="card full-width">
+                                <div class="card-header">
+                                    <h3>Technical Indicator Visualization</h3>
+                                </div>
+                                <div id="ta-chart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script src="script.js"></script>
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+    </script>
+</body>
+
+</html>
